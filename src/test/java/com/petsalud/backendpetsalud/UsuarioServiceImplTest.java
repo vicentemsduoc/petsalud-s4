@@ -39,7 +39,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void registrarUsuario_cuandoEmailNoExiste_debeGuardarYRetornarUsuario() {
+    void registrarUsuario_emailTrue() {
         // Arrange
         when(usuarioRepository.findByEmail(usuario.getEmail()))
                 .thenReturn(Optional.empty()); // Simulamos que el email NO existe
@@ -57,7 +57,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void registrarUsuario_cuandoEmailYaExiste_debeLanzarExcepcion() {
+    void registrarUsuario_emailFalse() {
         // Arrange
         when(usuarioRepository.findByEmail(usuario.getEmail()))
                 .thenReturn(Optional.of(usuario)); // Simulamos que el email SÍ existe
@@ -72,7 +72,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void actualizarUsuario_cuandoExiste_debeActualizarYGuardar() {
+    void actualizarUsuario_usuarioTrue() {
         // Arrange
         Long id = 1L;
         Usuario usuarioExistente = new Usuario();
@@ -100,7 +100,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void actualizarUsuario_cuandoNoExiste_debeLanzarExcepcion() {
+    void actualizarUsuario_usuarioFalse() {
         // Arrange
         Long id = 99L;
         when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
