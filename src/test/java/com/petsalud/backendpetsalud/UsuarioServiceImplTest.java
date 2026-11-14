@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class) // Activa Mockito en JUnit 5
@@ -69,4 +70,48 @@ class UsuarioServiceImplTest {
         assertEquals("El email ya está registrado", exception.getMessage());
         verify(usuarioRepository, never()).save(any()); // Verificamos que NO se guardó
     }
+
+    @Test
+    void actualizarUsuario_cuandoExiste_debeActualizarYGuardar() {
+        // Arrange
+        Long id = 1L;
+        Usuario usuarioExistente = new Usuario();
+        usuarioExistente.setId(id);
+        usuarioExistente.setNombre("Nombre Antiguo");
+        usuarioExistente.setEmail("juan@petsalud.cl");
+
+        Usuario datosNuevos = new Usuario();
+        datosNuevos.setNombre("Juan Actualizado");
+        datosNuevos.setApellido("Pérez");
+        datosNuevos.setTelefono("987654321");
+        datosNuevos.setDireccion("Nueva Dirección");
+
+        when(usuarioRepository.findById(id)).thenReturn(Optional.of(usuarioExistente));
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        Usuario resultado = usuarioService.actualizarUsuario(id, datosNuevos);
+
+        // Assert
+        assertEquals("Juan Actualizado", resultado.getNombre());
+        assertEquals("Pérez", resultado.getApellido());
+        assertEquals("987654321", resultado.getTelefono());
+        verify(usuarioRepository).save(usuarioExistente);
+    }
+
+    @Test
+    void actualizarUsuario_cuandoNoExiste_debeLanzarExcepcion() {
+        // Arrange
+        Long id = 99L;
+        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> usuarioService.actualizarUsuario(id, new Usuario()));
+
+        assertEquals("Usuario no encontrado", exception.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
 }
